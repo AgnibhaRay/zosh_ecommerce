@@ -140,7 +140,7 @@ const Navbar = () => {
             </Badge>
           </IconButton>
 
-          {isLarge && (
+          {/* {isLarge && (
             <Button
               onClick={becomeSellerClick}
               startIcon={<StorefrontIcon />}
@@ -148,7 +148,7 @@ const Navbar = () => {
             >
               Become Seller
             </Button>
-          )}
+          )} */}
         </div>
       </div>
       <Drawer open={open} onClose={toggleDrawer(false)}>

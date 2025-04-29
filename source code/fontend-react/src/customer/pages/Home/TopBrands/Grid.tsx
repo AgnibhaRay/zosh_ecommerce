@@ -42,7 +42,7 @@ const grid = [
 const TopBrand = () => {
   const {homePage}=useAppSelector(store=>store)
   return (
-    <div className="grid gap-4 grid-rows-12 grid-cols-12 lg:h-[600px] px-5 lg:px-20">
+    <div className="grid gap-4 grid-rows-12 grid-cols-12 lg:h-[600px] px-5 pt-3 lg:px-20">
       <div className=" col-span-3 row-span-12  text-white  rounded ">
         <img
           className="w-full h-full object-cover border-fuchsia-800 lg:border-[9px]s rounded-md"

@@ -15,8 +15,8 @@ const Navbar = ({DrawerList}:any) => {
   return (
     <div className='h-[10vh] flex items-center px-5 border-b'>
       <div className='flex items-center gap-3 '>
-        <IconButton onClick={toggleDrawer(true)} color='primary'>
-          <MenuIcon color='primary' />
+        <IconButton color='primary'>
+          {/* <MenuIcon color='primary' /> */}
         </IconButton>
 
         <h1 onClick={() => navigate("/")} className='logo text-xl cursor-pointer'>Zosh Bazzar</h1>

@@ -20,36 +20,36 @@ const menu = [
         icon: <StorefrontIcon className="text-primary-color" />,
         activeIcon: <StorefrontIcon className="text-white" />,
     },
-    {
-        name: "Add Seller",
-        path: "/admin/add-seller",
-        icon: <AddIcon className="text-primary-color" />,
-        activeIcon: <AddIcon className="text-white" />,
-    },
+    // {
+    //     name: "Add Seller",
+    //     path: "/admin/add-seller",
+    //     icon: <AddIcon className="text-primary-color" />,
+    //     activeIcon: <AddIcon className="text-white" />,
+    // },
     {
         name: "Customers",
         path: "/admin/customers",
         icon: <PeopleIcon className="text-primary-color" />,
         activeIcon: <PeopleIcon className="text-white" />,
     },
-    {
-        name: "Add Customer",
-        path: "/admin/add-customer",
-        icon: <AddIcon className="text-primary-color" />,
-        activeIcon: <AddIcon className="text-white" />,
-    },
+    // {
+    //     name: "Add Customer",
+    //     path: "/admin/add-customer",
+    //     icon: <AddIcon className="text-primary-color" />,
+    //     activeIcon: <AddIcon className="text-white" />,
+    // },
     {
         name: "Products",
         path: "/admin/products",
         icon: <LocalMallIcon className="text-primary-color" />,
         activeIcon: <LocalMallIcon className="text-white" />,
     },
-    {
-        name: "Add Product",
-        path: "/admin/add-product",
-        icon: <AddIcon className="text-primary-color" />,
-        activeIcon: <AddIcon className="text-white" />,
-    },
+    // {
+    //     name: "Add Product",
+    //     path: "/admin/add-product",
+    //     icon: <AddIcon className="text-primary-color" />,
+    //     activeIcon: <AddIcon className="text-white" />,
+    // },
     {
         name: "Coupons",
         path: "/admin/coupon",
@@ -80,12 +80,12 @@ const menu = [
         icon: <Category className="text-primary-color" />,
         activeIcon: <Category className="text-white" />,
     },
-    {
-        name: "Deals",
-        path: "/admin/deals",
-        icon: <LocalOfferIcon className="text-primary-color" />,
-        activeIcon: <LocalOfferIcon className="text-white" />,
-    },
+    // {
+    //     name: "Deals",
+    //     path: "/admin/deals",
+    //     icon: <LocalOfferIcon className="text-primary-color" />,
+    //     activeIcon: <LocalOfferIcon className="text-white" />,
+    // },
 ];
 
 const menu2 = [
