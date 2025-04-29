@@ -21,7 +21,6 @@ const initialState: AuthState = {
     otpSent: false
 };
 
-// Define the base URL for the API
 const API_URL = '/auth';
 
 export const sendLoginSignupOtp = createAsyncThunk<ApiResponse, { email: string }>(
@@ -43,13 +42,12 @@ export const signup = createAsyncThunk<AuthResponse, SignupRequest>(
     async (signupRequest, { rejectWithValue }) => {
         console.log("signup ", signupRequest)
         try {
-
             const response = await api.post<AuthResponse>(`${API_URL}/signup`, signupRequest);
             signupRequest.navigate("/")
             localStorage.setItem("jwt", response.data.jwt)
             return response.data;
         } catch (error: any) {
-            return rejectWithValue('Signup failed');
+            return rejectWithValue(error.response?.data?.message || 'Signup failed');
         }
     }
 );
@@ -105,7 +103,14 @@ const authSlice = createSlice({
         logout: (state) => {
             state.jwt = null;
             state.role = null;
-            localStorage.clear()
+            state.otpSent = false;
+            state.error = null;
+            localStorage.clear();
+        },
+        resetAuthState: (state) => {
+            state.otpSent = false;
+            state.error = null;
+            state.loading = false;
         },
     },
     extraReducers: (builder) => {
@@ -113,14 +118,17 @@ const authSlice = createSlice({
             .addCase(sendLoginSignupOtp.pending, (state) => {
                 state.loading = true;
                 state.error = null;
+                state.otpSent = false;
             })
             .addCase(sendLoginSignupOtp.fulfilled, (state) => {
                 state.loading = false;
                 state.otpSent = true;
+                state.error = null;
             })
             .addCase(sendLoginSignupOtp.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
+                state.otpSent = false;
             })
             .addCase(signup.pending, (state) => {
                 state.loading = true;
@@ -130,6 +138,7 @@ const authSlice = createSlice({
                 state.jwt = action.payload.jwt;
                 state.role = action.payload.role;
                 state.loading = false;
+                state.otpSent = false;
             })
             .addCase(signup.rejected, (state, action) => {
                 state.loading = false;
@@ -143,6 +152,7 @@ const authSlice = createSlice({
                 state.jwt = action.payload.jwt;
                 state.role = action.payload.role;
                 state.loading = false;
+                state.otpSent = false;
             })
             .addCase(signin.rejected, (state, action) => {
                 state.loading = false;
@@ -173,7 +183,7 @@ const authSlice = createSlice({
     },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, resetAuthState } = authSlice.actions;
 
 export default authSlice.reducer;
 

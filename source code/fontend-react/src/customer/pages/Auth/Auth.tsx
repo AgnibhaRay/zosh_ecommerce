@@ -2,22 +2,25 @@ import React, { useEffect, useState } from 'react'
 import LoginForm from './LoginForm'
 import { Alert, Button, Snackbar } from '@mui/material';
 import SignupForm from './SignupForm';
-import { useAppSelector } from '../../../Redux Toolkit/Store';
+import { useAppDispatch, useAppSelector } from '../../../Redux Toolkit/Store';
 
 const Auth = () => {
     const [isLoginPage, setIsLoginPage] = useState(true);
     const handleCloseSnackbar = () => setSnackbarOpen(false)
     const { auth } = useAppSelector(store => store)
     const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
-
         if (auth.otpSent || auth.error) {
             setSnackbarOpen(true);
             console.log("store ", auth.error)
         }
+    }, [auth.otpSent, auth.error])
 
-    }, [auth.otpSent,auth.error])
+    const handleAuthTypeChange = () => {
+        setIsLoginPage(!isLoginPage);
+    }
 
     return (
         <div className='flex justify-center h-[90vh] items-center'>
@@ -28,24 +31,25 @@ const Auth = () => {
 
                     <div className='flex items-center gap-1 justify-center mt-5'>
                         <p>{isLoginPage && "Don't"} have Account ?</p>
-                        <Button onClick={() => setIsLoginPage(!isLoginPage)} size='small'>{isLoginPage ? "create account" : "login"}</Button>
+                        <Button onClick={handleAuthTypeChange} size='small'>
+                            {isLoginPage ? "create account" : "login"}
+                        </Button>
                     </div>
                 </div>
-
-
             </div>
             <Snackbar
                 anchorOrigin={{ vertical: "top", horizontal: "right" }}
-                open={snackbarOpen} autoHideDuration={6000}
+                open={snackbarOpen}
+                autoHideDuration={6000}
                 onClose={handleCloseSnackbar}
             >
                 <Alert
                     onClose={handleCloseSnackbar}
-                    severity={auth.error?"error":"success"}
+                    severity={auth.error ? "error" : "success"}
                     variant="filled"
                     sx={{ width: '100%' }}
                 >
-                    {auth.error?auth.error : " otp sent to your email!"}
+                    {auth.error ? auth.error : "OTP sent to your email!"}
                 </Alert>
             </Snackbar>
         </div>
