@@ -4,6 +4,8 @@ import AdminDrawerList from '../../components/DrawerList'
 import AdminRoutes from '../../../routes/AdminRoutes'
 import { useAppDispatch } from '../../../Redux Toolkit/Store'
 import { fetchAllCustomers } from '../../../Redux Toolkit/Admin/AdminCustomerSlice'
+import SellersTable from '../sellers/SellersTable'
+import { Sell } from '@mui/icons-material'
 
 const AdminDashboard = () => {
   const dispatch = useAppDispatch();
@@ -23,6 +25,7 @@ const AdminDashboard = () => {
           </div>
           <div className="p-10 w-full lg:w-[80%] overflow-y-auto">
             <AdminRoutes />
+            <SellersTable />
           </div>
         </section>
       </div>
