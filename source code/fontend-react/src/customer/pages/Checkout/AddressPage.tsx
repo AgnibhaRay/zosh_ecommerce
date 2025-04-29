@@ -1,13 +1,14 @@
 import React, { useState } from 'react'
 import PricingCard from '../Cart/PricingCard'
-import { Box, Button, FormControlLabel, Modal, Radio, RadioGroup } from '@mui/material'
+import { Box, Button, FormControl, FormControlLabel, FormLabel, Modal, Radio, RadioGroup } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import AddressForm from './AddresssForm'
 import AddressCard from './AddressCard'
 import AddIcon from '@mui/icons-material/Add';
 import { createOrder } from '../../../Redux Toolkit/Customer/OrderSlice'
+import { Address } from '../../../types/userTypes'
 import { useAppDispatch, useAppSelector } from '../../../Redux Toolkit/Store'
-import { convertINRtoUSD } from '../../../util/cartCalculator'
+import userEvent from '@testing-library/user-event'
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -36,7 +37,7 @@ const AddressPage = () => {
     const navigate = useNavigate()
     const [value, setValue] = React.useState(0);
     const dispatch = useAppDispatch();
-    const { user, cart } = useAppSelector(store => store)
+    const { user } = useAppSelector(store => store)
     const [paymentGateway, setPaymentGateway] = useState(paymentGatwayList[0].value);
 
     const [open, setOpen] = React.useState(false);
@@ -44,25 +45,17 @@ const AddressPage = () => {
     const handleClose = () => setOpen(false);
 
     const handleChange = (event: any) => {
+        console.log("-----", event.target.value)
         setValue(event.target.value);
     };
 
     const handleCreateOrder = () => {
-        if (user.user?.addresses) {
-            // Calculate final total in INR including shipping if applicable
-            const totalInINR = (cart.cart?.totalSellingPrice || 0) + 
-                (!cart.cart?.totalSellingPrice || cart.cart?.totalSellingPrice < 1500 ? 79 : 0);
-            
-            // Convert to USD for payment processing
-            const totalInUSD = convertINRtoUSD(totalInINR);
-            
+        if (user.user?.addresses)
             dispatch(createOrder({
                 paymentGateway,
                 address: user.user?.addresses[value],
-                jwt: localStorage.getItem('jwt') || "",
-                amount: totalInUSD // Send USD amount to the backend
+                jwt: localStorage.getItem('jwt') || ""
             }))
-        }
     }
 
     const handlePaymentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -111,7 +104,7 @@ const AddressPage = () => {
                             {paymentGatwayList.map((item) => <FormControlLabel className={`border w-[45%] flex justify-center rounded-md pr-2 ${paymentGateway === item.value ? "border-primary-color" : ""}`} value={item.value} control={<Radio />} label={<div>
 
                                 <img
-                                    className={`${item.value === "stripe" ? "w-14" : ""} object-cover`}
+                                    className={`${item.value == "stripe" ? "w-14" : ""} object-cover`}
                                     src={item.image}
                                     alt={item.label}
                                 />

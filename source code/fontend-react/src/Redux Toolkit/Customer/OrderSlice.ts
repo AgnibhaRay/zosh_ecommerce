@@ -10,12 +10,12 @@ import { ApiResponse } from "../../types/authTypes";
 
 const initialState: OrderState = {
   orders: [],
-  orderItem: null,
+  orderItem:null,
   currentOrder: null,
   paymentOrder: null,
   loading: false,
   error: null,
-  orderCanceled: false
+  orderCanceled:false
 };
 
 const API_URL = "/api/orders";
@@ -59,21 +59,22 @@ export const fetchOrderById = createAsyncThunk<
 // Create a new order
 export const createOrder = createAsyncThunk<
   any,
-  { address: Address; jwt: string; paymentGateway: string; amount: number }
->("orders/createOrder", async ({ address, jwt, paymentGateway, amount }, { rejectWithValue }) => {
+  { address: Address; jwt: string, paymentGateway: string}
+>("orders/createOrder", async ({ address, jwt , paymentGateway}, { rejectWithValue }) => {
   try {
-    // amount is already in USD
-    const response = await api.post<any>(
-      `${API_URL}?paymentMethod=${paymentGateway}`,
-      address,
-      {
-        headers: { Authorization: `Bearer ${jwt}` },
-      }
-    );
+    const response = await api.post<any>(API_URL, address, {
+      headers: { Authorization: `Bearer ${jwt}` },
+      params:{paymentMethod:paymentGateway}
+    });
+    console.log("order created ", response.data);
+    if(response.data.payment_link_url){
+        window.location.href=response.data.payment_link_url
+    }
+  
     return response.data;
   } catch (error: any) {
     console.log("error ", error.response);
-    return rejectWithValue(error.response.data);
+    return rejectWithValue("Failed to create order");
   }
 });
 

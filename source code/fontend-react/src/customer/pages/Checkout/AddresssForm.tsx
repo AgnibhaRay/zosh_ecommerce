@@ -5,12 +5,13 @@ import {
   Box,
   Button,
   TextField,
+  Typography,
   Grid,
 } from '@mui/material';
-import { useAppDispatch, useAppSelector } from '../../../Redux Toolkit/Store';
+import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '../../../Redux Toolkit/Store';
 import { createOrder } from '../../../Redux Toolkit/Customer/OrderSlice';
 import { Address } from '../../../types/userTypes';
-import { convertINRtoUSD } from '../../../util/cartCalculator';
 
 // Validation schema
 const ContactSchema = Yup.object().shape({
@@ -29,13 +30,11 @@ const ContactSchema = Yup.object().shape({
 
 interface AddressFormProp {
   handleClose: () => void;
-  paymentGateway: string;
+  paymentGateway:string
 }
 
-const AddressForm: React.FC<AddressFormProp> = ({ handleClose, paymentGateway }) => {
-  const dispatch = useAppDispatch();
-  const { cart } = useAppSelector(store => store);
-
+const AddressForm:React.FC<AddressFormProp> = ({handleClose,paymentGateway}) => {
+  const dispatch=useAppDispatch()
   const formik = useFormik({
     initialValues: {
       name: '',
@@ -48,29 +47,18 @@ const AddressForm: React.FC<AddressFormProp> = ({ handleClose, paymentGateway })
     },
     validationSchema: ContactSchema,
     onSubmit: (values) => {
+      console.log("form submited", values);
       handleCreateOrder(values as Address);
+      handleClose();
     },
   });
 
-  const handleCreateOrder = (address: Address) => {
-    // Calculate total with shipping in INR
-    const totalInINR = (cart.cart?.totalSellingPrice || 0) + 
-      (!cart.cart?.totalSellingPrice || cart.cart?.totalSellingPrice < 1500 ? 79 : 0);
-    
-    // Convert to USD with proper rounding
-    const totalInUSD = convertINRtoUSD(totalInINR);
-
-    dispatch(createOrder({
-      address,
-      jwt: localStorage.getItem('jwt') || "",
-      paymentGateway,
-      amount: totalInUSD // Send USD amount to the backend
-    }));
-    handleClose();
-  };
+  const handleCreateOrder=(address:Address)=>{
+    dispatch(createOrder({address,jwt:localStorage.getItem('jwt')|| "",paymentGateway}))
+  }
 
   return (
-    <Box sx={{ maxWidth: 600, mx: 'auto' }}>
+    <Box sx={{ maxWidth: 600, mx: 'auto'}}>
       <p className='text-xl font-bold text-center pb-5'>
         Contact Details
       </p>
@@ -161,7 +149,7 @@ const AddressForm: React.FC<AddressFormProp> = ({ handleClose, paymentGateway })
             />
           </Grid>
           <Grid item xs={12}>
-            <Button sx={{ py: "14px" }} type="submit" variant="contained" color="primary" fullWidth>
+            <Button sx={{py:"14px"}} type="submit" variant="contained" color="primary" fullWidth>
               Add Address
             </Button>
           </Grid>
