@@ -1,5 +1,6 @@
 // src/slices/authSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import axios from 'axios';
 import {
     AuthResponse,
     LoginRequest,
@@ -13,14 +14,16 @@ import { RootState } from '../Store';
 import { resetUserState } from './UserSlice';
 import { resetCartState } from './CartSlice';
 
+
 const initialState: AuthState = {
     jwt: null,
     role: null,
     loading: false,
     error: null,
-    otpSent: false
+    otpSent:false
 };
 
+// Define the base URL for the API
 const API_URL = '/auth';
 
 export const sendLoginSignupOtp = createAsyncThunk<ApiResponse, { email: string }>(
@@ -28,11 +31,11 @@ export const sendLoginSignupOtp = createAsyncThunk<ApiResponse, { email: string 
     async ({ email }, { rejectWithValue }) => {
         try {
             const response = await api.post(`${API_URL}/sent/login-signup-otp`, { email });
-            console.log("otp sent successfully", response.data);
+            console.log("otp sent successfully",response.data);
             return response.data;
-        } catch (error: any) {
-            console.log("error", error.response)
-            return rejectWithValue(error.response.data.error || 'Failed to send OTP');
+        } catch (error:any) {
+            console.log("error",error.response)
+            return rejectWithValue(error.response.data.error||'Failed to send OTP');
         }
     }
 );
@@ -42,12 +45,13 @@ export const signup = createAsyncThunk<AuthResponse, SignupRequest>(
     async (signupRequest, { rejectWithValue }) => {
         console.log("signup ", signupRequest)
         try {
+            
             const response = await api.post<AuthResponse>(`${API_URL}/signup`, signupRequest);
-            signupRequest.navigate("/")
-            localStorage.setItem("jwt", response.data.jwt)
+           signupRequest.navigate("/")
+           localStorage.setItem("jwt",response.data.jwt)
             return response.data;
-        } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || 'Signup failed');
+        } catch (error:any) {
+            return rejectWithValue('Signup failed');
         }
     }
 );
@@ -57,17 +61,17 @@ export const signin = createAsyncThunk<AuthResponse, LoginRequest>(
     async (loginRequest, { rejectWithValue }) => {
         try {
             const response = await api.post<AuthResponse>(`${API_URL}/signin`, loginRequest);
-            console.log("login successful", response.data);
-            localStorage.setItem("jwt", response.data.jwt);
-            if (response.data.role === "ROLE_ADMIN") {
-                loginRequest.navigate("/admin/dashboard");
-            } else {
-                loginRequest.navigate("/");
-            }
+           console.log("login successful", response.data);
+           localStorage.setItem("jwt", response.data.jwt);
+           if (response.data.role === "admin") {
+               loginRequest.navigate("/admin/dashboard");
+           } else {
+               loginRequest.navigate("/");
+           }
             return response.data;
-        } catch (error: any) {
+        } catch (error:any) {
             console.log("error ", error.response)
-            return rejectWithValue(error.response?.data?.message || 'Signin failed');
+            return rejectWithValue('Signin failed');
         }
     }
 );
@@ -78,7 +82,7 @@ export const resetPassword = createAsyncThunk<ApiResponse, ResetPasswordRequest>
         try {
             const response = await api.post<ApiResponse>(`${API_URL}/reset-password`, resetPasswordRequest);
             return response.data;
-        } catch (error: any) {
+        } catch (error:any) {
             return rejectWithValue('Reset password failed');
         }
     }
@@ -90,7 +94,7 @@ export const resetPasswordRequest = createAsyncThunk<ApiResponse, { email: strin
         try {
             const response = await api.post<ApiResponse>(`${API_URL}/reset-password-request`, { email });
             return response.data;
-        } catch (error: any) {
+        } catch (error:any) {
             return rejectWithValue('Reset password request failed');
         }
     }
@@ -103,14 +107,7 @@ const authSlice = createSlice({
         logout: (state) => {
             state.jwt = null;
             state.role = null;
-            state.otpSent = false;
-            state.error = null;
-            localStorage.clear();
-        },
-        resetAuthState: (state) => {
-            state.otpSent = false;
-            state.error = null;
-            state.loading = false;
+            localStorage.clear()
         },
     },
     extraReducers: (builder) => {
@@ -118,17 +115,14 @@ const authSlice = createSlice({
             .addCase(sendLoginSignupOtp.pending, (state) => {
                 state.loading = true;
                 state.error = null;
-                state.otpSent = false;
             })
             .addCase(sendLoginSignupOtp.fulfilled, (state) => {
                 state.loading = false;
                 state.otpSent = true;
-                state.error = null;
             })
             .addCase(sendLoginSignupOtp.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
-                state.otpSent = false;
             })
             .addCase(signup.pending, (state) => {
                 state.loading = true;
@@ -138,7 +132,6 @@ const authSlice = createSlice({
                 state.jwt = action.payload.jwt;
                 state.role = action.payload.role;
                 state.loading = false;
-                state.otpSent = false;
             })
             .addCase(signup.rejected, (state, action) => {
                 state.loading = false;
@@ -152,7 +145,6 @@ const authSlice = createSlice({
                 state.jwt = action.payload.jwt;
                 state.role = action.payload.role;
                 state.loading = false;
-                state.otpSent = false;
             })
             .addCase(signin.rejected, (state, action) => {
                 state.loading = false;
@@ -183,9 +175,11 @@ const authSlice = createSlice({
     },
 });
 
-export const { logout, resetAuthState } = authSlice.actions;
+export const { logout } = authSlice.actions;
 
 export default authSlice.reducer;
+
+
 
 export const performLogout = () => async (dispatch: any) => {
     dispatch(logout());

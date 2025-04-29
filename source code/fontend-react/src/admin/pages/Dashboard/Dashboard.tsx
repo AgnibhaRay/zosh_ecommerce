@@ -6,7 +6,6 @@ import { Alert, Snackbar } from '@mui/material'
 import { useAppDispatch, useAppSelector } from '../../../Redux Toolkit/Store'
 import { fetchAllCustomers } from '../../../Redux Toolkit/Admin/AdminCustomerSlice'
 import { fetchAllProductsAdmin } from '../../../Redux Toolkit/Admin/AdminProductSlice'
-import { fetchSellers } from '../../../Redux Toolkit/Seller/sellerSlice'
 
 const AdminDashboard = () => {
   const { deal, admin } = useAppSelector(store => store)
@@ -22,7 +21,6 @@ const AdminDashboard = () => {
     const jwt = localStorage.getItem("jwt") || "";
     dispatch(fetchAllCustomers(jwt));
     dispatch(fetchAllProductsAdmin(jwt));
-    dispatch(fetchSellers("ACTIVE")); // Fetch active sellers
   }, [dispatch]);
 
   useEffect(() => {
@@ -39,7 +37,7 @@ const AdminDashboard = () => {
           <div className="hidden lg:block h-full">
             <AdminDrawerList />
           </div>
-          <div className="p-10 w-full lg:w-[80%] overflow-y-auto">
+          <div className="p-10 w-full lg:w-[80%]  overflow-y-auto">
             <AdminRoutes />
           </div>
         </section>

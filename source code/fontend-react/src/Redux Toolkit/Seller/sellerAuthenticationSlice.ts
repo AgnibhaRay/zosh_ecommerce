@@ -52,7 +52,7 @@ export const createSeller = createAsyncThunk<Seller, Seller>(
     'sellers/createSeller',
     async (seller: Seller, { rejectWithValue }) => {
         try {
-            const response = await api.post<Seller>(`${API_URL}/register`, seller);
+            const response = await api.post<Seller>(API_URL, seller);
             console.log('create seller', response.data);
             return response.data;
         } catch (error:any) {
@@ -60,7 +60,7 @@ export const createSeller = createAsyncThunk<Seller, Seller>(
                 console.error('Create seller error response data:', error.response.data);
                 console.error('Create seller error response status:', error.response.status);
                 console.error('Create seller error response headers:', error.response.headers);
-                return rejectWithValue(error.response.data?.message || 'Failed to create seller');
+                return rejectWithValue(error.message);
             } else {
                 console.error('Create seller error message:', error.message);
                 return rejectWithValue('Failed to create seller');

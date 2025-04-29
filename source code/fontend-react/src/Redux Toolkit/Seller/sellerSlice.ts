@@ -272,7 +272,7 @@ export const createSeller = createAsyncThunk<Seller, { seller: Omit<Seller, 'id'
   async ({ seller, jwt }, { rejectWithValue }) => {
     try {
       console.log('Creating seller with data:', seller);
-      const response = await api.post<Seller>('/admin/seller/create', seller, {
+      const response = await api.post<Seller>(`${API_URL}/admin/seller/create`, seller, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
       console.log('Seller creation API response:', response);

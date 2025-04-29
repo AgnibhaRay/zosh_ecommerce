@@ -6,7 +6,9 @@ import BecomeSellerFormStep2 from "./BecomeSellerFormStep2";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import BecomeSellerFormStep4 from "./BecomeSellerFormStep4";
+import { useDispatch } from "react-redux";
 import { useAppDispatch, useAppSelector } from "../../../Redux Toolkit/Store";
+import SellerLoginForm from "./SellerLoginForm";
 import { createSeller } from "../../../Redux Toolkit/Seller/sellerAuthenticationSlice";
 
 const steps = [
@@ -26,6 +28,8 @@ const SellerAccountForm = () => {
     setActiveStep(activeStep + value);
   };
 
+  const [otp, setOpt] = useState<any>();
+ 
   const formik = useFormik({
     initialValues: {
       mobile: "",
@@ -57,44 +61,22 @@ const SellerAccountForm = () => {
       },
       password: ""
     },
-    validationSchema: Yup.object({
-      mobile: Yup.string().required("Mobile is required"),
-      gstin: Yup.string().required("GSTIN is required"),
-      pickupAddress: Yup.object({
-        name: Yup.string().required("Name is required"),
-        mobile: Yup.string().required("Mobile is required"),
-        pincode: Yup.string().required("Pincode is required"),
-        address: Yup.string().required("Address is required"),
-        locality: Yup.string().required("Locality is required"),
-        city: Yup.string().required("City is required"),
-        state: Yup.string().required("State is required")
-      }),
-      bankDetails: Yup.object({
-        accountNumber: Yup.string().required("Account number is required"),
-        ifscCode: Yup.string().required("IFSC code is required"),
-        accountHolderName: Yup.string().required("Account holder name is required")
-      }),
-      sellerName: Yup.string().required("Seller name is required"),
-      email: Yup.string().email("Invalid email").required("Email is required"),
-      businessDetails: Yup.object({
-        businessName: Yup.string().required("Business name is required")
-      }),
-      password: Yup.string()
-        .min(6, "Password must be at least 6 characters")
-        .required("Password is required")
-    }),
+    // validationSchema: FormSchema,
     onSubmit: (values) => {
       console.log(values, "formik submitted");
       console.log("active step ", activeStep);
-      dispatch(createSeller(values))
+      dispatch(createSeller(formik.values))
     },
   });
 
   const handleOtpChange = (otpValue: string) => {
-    formik.setFieldValue("otp", otpValue);
+    setOpt(otpValue);
+    console.log(otpValue);
+    // formik.setFieldValue("opt",otpValue)
   };
 
   const handleSubmit = () => {
+    //submit form data to server
     formik.handleSubmit();
     console.log("Form Submitted");
   };

@@ -12,6 +12,7 @@ import AdminAuth from './admin/pages/Auth/AdminAuth';
 import { fetchUserProfile } from './Redux Toolkit/Customer/UserSlice';
 import { createHomeCategories } from './Redux Toolkit/Customer/Customer/AsyncThunk';
 import { homeCategories } from './data/homeCategories';
+import Mobile from './data/Products/mobile';
 import SellerDashboard from './seller/pages/SellerDashboard/SellerDashboard';
 import SellerAccountVerification from './seller/pages/SellerAccountVerification';
 import SellerAccountVerified from './seller/pages/SellerAccountVerified';
@@ -49,7 +50,7 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   const dispatch = useAppDispatch()
-  const { auth, sellerAuth, sellers } = useAppSelector(store => store)
+  const { auth, sellerAuth, sellers, user } = useAppSelector(store => store)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,6 +68,8 @@ function App() {
     <ThemeProvider theme={customeTheme}>
       <div className='App'>
         <Routes>
+          {sellers.profile && <Route path='/seller/*' element={<SellerDashboard />} />}
+          
           {/* Admin Routes */}
           <Route path="/admin-login" element={<AdminAuth />} />
           <Route path="/admin/*" element={
@@ -74,15 +77,13 @@ function App() {
               <AdminDashboard />
             </AdminRoute>
           } />
-          
-          {/* Seller Routes */}
-          {sellers.profile && <Route path='/seller/*' element={<SellerDashboard />} />}
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" />} />
+
+          <Route path='/verify-seller/:otp' element={<SellerAccountVerification />} />
+          <Route path='/seller-account-verified' element={<SellerAccountVerified />} />
           <Route path='/become-seller' element={<BecomeSeller />} />
-          <Route path='/account/verify' element={<SellerAccountVerification />} />
-          <Route path='/account/verified' element={<SellerAccountVerified />} />
-          
-          {/* Customer Routes - Acts as fallback for all other paths */}
-          <Route path='/*' element={<CustomerRoutes />} />
+          <Route path='/dummy' element={<Mobile />} />
+          <Route path='*' element={<CustomerRoutes />} />
         </Routes>
       </div>
     </ThemeProvider>
