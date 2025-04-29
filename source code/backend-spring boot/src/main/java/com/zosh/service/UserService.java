@@ -11,5 +11,10 @@ public interface UserService {
 	
 	public User findUserByEmail(String email) throws UserException;
 
+	public List<User> getAllUsers();
+
+	public User createUser(User user) throws UserException;
+
+	public void deleteUser(Long userId) throws UserException;
 
 }
