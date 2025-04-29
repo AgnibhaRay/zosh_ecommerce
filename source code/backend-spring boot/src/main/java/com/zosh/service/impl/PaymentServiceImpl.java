@@ -116,13 +116,14 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentLink createRazorpayPaymentLink(User user,
-                                            Long Amount,
+                                            Long amountUSD,
                                             Long orderId
     )
             throws RazorpayException {
 
-        Long amount = Amount * 100;
-
+        // Convert USD to INR for Razorpay
+        Long amountINR = Math.round(amountUSD * 83.23); // Using current exchange rate
+        Long amount = amountINR * 100; // Convert to paisa
 
         try {
             // Instantiate a Razorpay client with your key ID and secret
@@ -182,13 +183,13 @@ public class PaymentServiceImpl implements PaymentService {
                         .setQuantity(1L)
                         .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
                                 .setCurrency("usd")
-                                .setUnitAmount(amount*100)
+                                .setUnitAmount(amount*100) // Amount is already in USD cents
                                 .setProductData(SessionCreateParams
                                         .LineItem
                                         .PriceData
                                         .ProductData
                                         .builder()
-                                        .setName("Top up wallet")
+                                        .setName("Order Payment")
                                         .build()
                                 ).build()
                         ).build()
