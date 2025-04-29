@@ -68,12 +68,12 @@ const ProductsTable = () => {
     }
   };
 
-  const filteredProducts = products.filter(product => 
-    product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.color.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = Array.isArray(products) ? products.filter(product => 
+    (product.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (product.color || '').toLowerCase().includes(searchTerm.toLowerCase())
+  ) : [];
 
-  if (loading && products.length === 0) {
+  if (loading && (!products || products.length === 0)) {
     return (
       <div className="flex justify-center items-center h-[200px]">
         <CircularProgress />
