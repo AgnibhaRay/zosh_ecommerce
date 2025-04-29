@@ -120,53 +120,75 @@ public class PaymentServiceImpl implements PaymentService {
                                             Long orderId
     )
             throws RazorpayException {
-        try {
-            // Convert USD to INR for Razorpay (using 83.23 as exchange rate)
-            Long amountINR = Math.round(amountUSD * 83.23); 
-            Long amountPaise = amountINR * 100; // Convert to paise
 
+        // Convert USD to INR for Razorpay
+        Long amountINR = Math.round(amountUSD * 83.23); // Using current exchange rate
+        Long amount = amountINR * 100; // Convert to paisa
+
+        try {
+            // Instantiate a Razorpay client with your key ID and secret
             RazorpayClient razorpay = new RazorpayClient(apiKey, apiSecret);
 
             JSONObject paymentLinkRequest = new JSONObject();
-            paymentLinkRequest.put("amount", amountPaise);
-            paymentLinkRequest.put("currency", "INR");
+            paymentLinkRequest.put("amount",amount);
+            paymentLinkRequest.put("currency","INR");
 
+            // Create a JSON object with the customer details
             JSONObject customer = new JSONObject();
-            customer.put("name", user.getFullName());
-            customer.put("email", user.getEmail());
-            paymentLinkRequest.put("customer", customer);
+            customer.put("name",user.getFullName());
 
+            customer.put("email",user.getEmail());
+            paymentLinkRequest.put("customer",customer);
+
+            // Create a JSON object with the notification settings
             JSONObject notify = new JSONObject();
-            notify.put("email", true);
-            paymentLinkRequest.put("notify", notify);
-            paymentLinkRequest.put("reminder_enable", true);
+            notify.put("email",true);
+            paymentLinkRequest.put("notify",notify);
 
-            paymentLinkRequest.put("callback_url", "http://localhost:3000/payment-success/" + orderId);
-            paymentLinkRequest.put("callback_method", "get");
+            // Set the reminder settings
+            paymentLinkRequest.put("reminder_enable",true);
+
+            // Set the callback URL and method
+            paymentLinkRequest.put("callback_url","http://localhost:3000/payment-success/"+orderId);
+            paymentLinkRequest.put("callback_method","get");
 
             PaymentLink payment = razorpay.paymentLink.create(paymentLinkRequest);
+
+            String paymentLinkUrl = payment.get("short_url");
+            String paymentLinkId = payment.get("id");
+
+
+
+            System.out.println("payment ----- "+payment);
+
             return payment;
+
         } catch (RazorpayException e) {
+
             System.out.println("Error creating payment link: " + e.getMessage());
             throw new RazorpayException(e.getMessage());
         }
     }
 
     @Override
-    public String createStripePaymentLink(User user, Long amountUSD, Long orderId) throws StripeException {
+    public String createStripePaymentLink(User user, Long amount,Long orderId) throws StripeException {
         Stripe.apiKey = stripeSecretKey;
 
         SessionCreateParams params = SessionCreateParams.builder()
                 .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setSuccessUrl("http://localhost:3000/payment-success/" + orderId)
+                .setSuccessUrl("http://localhost:3000/payment-success/"+orderId)
                 .setCancelUrl("http://localhost:3000/payment/cancel")
                 .addLineItem(SessionCreateParams.LineItem.builder()
                         .setQuantity(1L)
                         .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
                                 .setCurrency("usd")
-                                .setUnitAmount(amountUSD * 100) // Convert to cents
-                                .setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder()
+                                .setUnitAmount(amount*100) // Amount is already in USD cents
+                                .setProductData(SessionCreateParams
+                                        .LineItem
+                                        .PriceData
+                                        .ProductData
+                                        .builder()
                                         .setName("Order Payment")
                                         .build()
                                 ).build()
@@ -174,6 +196,12 @@ public class PaymentServiceImpl implements PaymentService {
                 ).build();
 
         Session session = Session.create(params);
+
+        System.out.println("session _____ " + session);
+
+//        PaymentLinkResponse res = new PaymentLinkResponse();
+//        res.setPayment_link_url(session.getUrl());
+
         return session.getUrl();
     }
 }

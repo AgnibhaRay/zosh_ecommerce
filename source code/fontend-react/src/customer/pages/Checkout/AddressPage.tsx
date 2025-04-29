@@ -21,11 +21,11 @@ const style = {
 };
 
 const paymentGatwayList = [
-    // {
-    //     value: "RAZORPAY",
-    //     image: "https://razorpay.com/newsroom-content/uploads/2020/12/output-onlinepngtools-1-1.png",
-    //     label: "Razarpay"
-    // },
+    {
+        value: "RAZORPAY",
+        image: "https://razorpay.com/newsroom-content/uploads/2020/12/output-onlinepngtools-1-1.png",
+        label: "Razarpay"
+    },
     {
         value: "STRIPE",
         image: "/stripe_logo.png",
@@ -61,11 +61,7 @@ const AddressPage = () => {
                 address: user.user?.addresses[value],
                 jwt: localStorage.getItem('jwt') || "",
                 amount: totalInUSD // Send USD amount to the backend
-            })).then((action) => {
-                if (action.payload && action.payload.payment_link_url) {
-                    window.location.href = action.payload.payment_link_url;
-                }
-            });
+            }))
         }
     }
 
