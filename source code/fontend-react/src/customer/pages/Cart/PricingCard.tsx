@@ -1,17 +1,12 @@
 import { Divider } from "@mui/material";
 import React from "react";
-import {
-  sumCartItemMrpPrice,
-  sumCartItemSellingPrice,
-} from "../../../util/cartCalculator";
 import { useAppSelector } from "../../../Redux Toolkit/Store";
 
 const PricingCard = () => {
   const { cart } = useAppSelector((store) => store);
   
-  const cartItems = cart.cart?.cartItems || [];
-  const subtotal = sumCartItemMrpPrice(cartItems);
-  const discountedPrice = sumCartItemSellingPrice(cartItems);
+  const subtotal = cart.cart?.totalMrpPrice || 0;
+  const discountedPrice = cart.cart?.totalSellingPrice || 0;
   const discount = subtotal - discountedPrice;
   
   const isShippingFree = discountedPrice >= 1500;
@@ -43,7 +38,6 @@ const PricingCard = () => {
         </div>
       </div>
       <Divider />
-
       <div className="font-medium px-5 py-2 flex justify-between items-center">
         <span>Total Amount</span>
         <span>₹ {total}</span>

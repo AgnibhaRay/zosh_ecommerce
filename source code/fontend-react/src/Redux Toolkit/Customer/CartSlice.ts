@@ -141,6 +141,11 @@ const cartSlice = createSlice({
         (state, action: PayloadAction<CartItem>) => {
           if (state.cart) {
             state.cart.cartItems.push(action.payload);
+            const mrpPrice = sumCartItemMrpPrice(state.cart.cartItems);
+            const sellingPrice = sumCartItemSellingPrice(state.cart.cartItems);
+            state.cart.totalSellingPrice = sellingPrice;
+            state.cart.totalMrpPrice = mrpPrice;
+            state.cart.totalItem = state.cart.cartItems.length;
           }
           state.loading = false;
         }
