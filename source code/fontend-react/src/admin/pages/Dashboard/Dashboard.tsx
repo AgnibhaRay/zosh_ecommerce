@@ -1,15 +1,16 @@
 import React from 'react'
 import Navbar from '../../../admin seller/components/navbar/Navbar'
 import AdminDrawerList from '../../components/DrawerList'
-import SellersTable from '../sellers/SellersTable'
+import AdminRoutes from '../../../routes/AdminRoutes'
 import { useAppDispatch } from '../../../Redux Toolkit/Store'
-import { fetchSellers } from '../../../Redux Toolkit/Seller/sellerSlice'
+import { fetchAllCustomers } from '../../../Redux Toolkit/Admin/AdminCustomerSlice'
 
 const AdminDashboard = () => {
   const dispatch = useAppDispatch();
 
   React.useEffect(() => {
-    dispatch(fetchSellers('ACTIVE')); // Fetch sellers when dashboard loads
+    // Initialize customer data when dashboard loads
+    dispatch(fetchAllCustomers(localStorage.getItem('jwt') || ''));
   }, [dispatch]);
 
   return (
@@ -21,7 +22,7 @@ const AdminDashboard = () => {
             <AdminDrawerList />
           </div>
           <div className="p-10 w-full lg:w-[80%] overflow-y-auto">
-            <SellersTable />
+            <AdminRoutes />
           </div>
         </section>
       </div>
