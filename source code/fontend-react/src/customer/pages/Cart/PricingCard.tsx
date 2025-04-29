@@ -9,38 +9,43 @@ import { useAppSelector } from "../../../Redux Toolkit/Store";
 const PricingCard = () => {
   const { cart } = useAppSelector((store) => store);
   
-  const isShippingFree = (cart.cart?.totalSellingPrice || 0) >= 1500;
+  const cartItems = cart.cart?.cartItems || [];
+  const subtotal = sumCartItemMrpPrice(cartItems);
+  const discountedPrice = sumCartItemSellingPrice(cartItems);
+  const discount = subtotal - discountedPrice;
+  
+  const isShippingFree = discountedPrice >= 1500;
   const shippingCharge = isShippingFree ? 0 : 79;
-  const total = (cart.cart?.totalSellingPrice || 0) + shippingCharge;
+  const total = discountedPrice + shippingCharge;
 
   return (
     <div>
       <div className="space-y-3 p-5">
         <div className="flex justify-between items-center">
-          <span>Subtotal</span>
-          <span>₹ {cart.cart?.totalSellingPrice || 0}</span>
+          <span>Subtotal (MRP)</span>
+          <span>₹ {subtotal}</span>
         </div>
         <div className="flex justify-between items-center">
           <span>Discount</span>
-          <span>
-            ₹{" "}
-            {sumCartItemMrpPrice(cart.cart?.cartItems || []) -
-              sumCartItemSellingPrice(cart.cart?.cartItems || [])}
-          </span>
+          <span className="text-green-600">- ₹ {discount}</span>
         </div>
         <div className="flex justify-between items-center">
           <span>Shipping</span>
-          <span>{isShippingFree ? 'Free' : `₹ ${shippingCharge}`}</span>
+          <span>{isShippingFree ? (
+            <span className="text-green-600">Free</span>
+          ) : (
+            `₹ ${shippingCharge}`
+          )}</span>
         </div>
         <div className="flex justify-between items-center">
           <span>Platform fee</span>
-          <span className="text-teal-600">Free</span>
+          <span className="text-green-600">Free</span>
         </div>
       </div>
       <Divider />
 
       <div className="font-medium px-5 py-2 flex justify-between items-center">
-        <span>Total</span>
+        <span>Total Amount</span>
         <span>₹ {total}</span>
       </div>
     </div>
