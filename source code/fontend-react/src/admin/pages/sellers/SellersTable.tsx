@@ -6,11 +6,11 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Box, Button, Chip, CircularProgress, FormControl, InputLabel, Menu, MenuItem, Select, styled, TableFooter, TablePagination, TextField } from '@mui/material';
+import { Box, Button, Chip, CircularProgress, FormControl, InputLabel, Menu, MenuItem, Select, styled, TableFooter, TablePagination, TextField, IconButton } from '@mui/material';
 import TablePaginationActions from '@mui/material/TablePagination/TablePaginationActions';
 import { useAppDispatch, useAppSelector } from '../../../Redux Toolkit/Store';
-import { fetchSellers, selectSellers, updateSellerAccountStatus } from '../../../Redux Toolkit/Seller/sellerSlice';
-import { Search } from '@mui/icons-material';
+import { deleteSeller, fetchSellers, updateSellerAccountStatus } from '../../../Redux Toolkit/Seller/sellerSlice';
+import { Search, Delete } from '@mui/icons-material';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -60,6 +60,12 @@ export default function SellersTable() {
     const handleUpdateSellerAccountStatus = (id: number, status: string) => {
         dispatch(updateSellerAccountStatus({ id, status }));
         handleClose(id);
+    }
+
+    const handleDeleteSeller = (id: number | undefined) => {
+        if (id && window.confirm('Are you sure you want to delete this seller?')) {
+            dispatch(deleteSeller(id));
+        }
     }
 
     const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
@@ -159,7 +165,7 @@ export default function SellersTable() {
                                             }}
                                         />
                                     </StyledTableCell>
-                                    <StyledTableCell align="right">
+                                    <StyledTableCell align="right" sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
                                         <Button
                                             variant="contained"
                                             size="small"
@@ -167,6 +173,13 @@ export default function SellersTable() {
                                         >
                                             Change Status
                                         </Button>
+                                        <IconButton
+                                            onClick={() => handleDeleteSeller(seller.id)}
+                                            color="error"
+                                            size="small"
+                                        >
+                                            <Delete />
+                                        </IconButton>
                                         <Menu
                                             id={"status-menu-" + seller.id}
                                             anchorEl={anchorEl[seller.id || 1]}

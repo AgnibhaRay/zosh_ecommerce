@@ -4,7 +4,6 @@ import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import LocalMallIcon from '@mui/icons-material/LocalMall';
 import StorefrontIcon from '@mui/icons-material/Storefront';
-import SellersTable from '../sellers/SellersTable';
 
 const DashboardOverview = () => {
   const { adminCustomers, adminProducts, sellers } = useAppSelector((state) => state);
@@ -59,13 +58,6 @@ const DashboardOverview = () => {
           </Grid>
         ))}
       </Grid>
-
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h5" gutterBottom>
-          Seller Management
-        </Typography>
-        <SellersTable />
-      </Box>
     </Box>
   );
 };
