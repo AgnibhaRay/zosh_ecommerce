@@ -11,6 +11,7 @@ import TablePaginationActions from '@mui/material/TablePagination/TablePaginatio
 import { useAppDispatch, useAppSelector } from '../../../Redux Toolkit/Store';
 import { deleteSeller, fetchSellers, updateSellerAccountStatus } from '../../../Redux Toolkit/Seller/sellerSlice';
 import { Search, Delete } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -47,10 +48,15 @@ export default function SellersTable() {
     const [searchTerm, setSearchTerm] = React.useState("");
     const { sellers } = useAppSelector(store => store);
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
     React.useEffect(() => {
         dispatch(fetchSellers(accountStatus))
     }, [accountStatus, dispatch])
+
+    const handleAddNewSeller = () => {
+        navigate('/admin/add-seller');
+    };
 
     const handleAccountStatusChange = (event: any) => {
         setAccountStatus(event.target.value as string);
@@ -94,29 +100,38 @@ export default function SellersTable() {
 
     return (
         <>
-            <Box sx={{ display: 'flex', gap: 2, mb: 3, alignItems: 'center' }}>
-                <FormControl sx={{ width: 200 }}>
-                    <InputLabel>Account Status</InputLabel>
-                    <Select
-                        value={accountStatus}
-                        onChange={handleAccountStatusChange}
-                        label="Account Status"
-                    >
-                        {accountStatuses.map((status) =>
-                            <MenuItem key={status.status} value={status.status}>{status.title}</MenuItem>)}
-                    </Select>
-                </FormControl>
+            <Box sx={{ display: 'flex', gap: 2, mb: 3, alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                    <FormControl sx={{ width: 200 }}>
+                        <InputLabel>Account Status</InputLabel>
+                        <Select
+                            value={accountStatus}
+                            onChange={handleAccountStatusChange}
+                            label="Account Status"
+                        >
+                            {accountStatuses.map((status) =>
+                                <MenuItem key={status.status} value={status.status}>{status.title}</MenuItem>)}
+                        </Select>
+                    </FormControl>
 
-                <TextField
-                    sx={{ width: 300 }}
-                    label="Search sellers"
-                    variant="outlined"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    InputProps={{
-                        endAdornment: <Search />
-                    }}
-                />
+                    <TextField
+                        sx={{ width: 300 }}
+                        label="Search sellers"
+                        variant="outlined"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        InputProps={{
+                            endAdornment: <Search />
+                        }}
+                    />
+                </Box>
+                <Button 
+                    variant="contained" 
+                    color="primary" 
+                    onClick={handleAddNewSeller}
+                >
+                    Add New Seller
+                </Button>
             </Box>
 
             <TableContainer component={Paper}>
@@ -182,14 +197,14 @@ export default function SellersTable() {
                                         </IconButton>
                                         <Menu
                                             id={"status-menu-" + seller.id}
-                                            anchorEl={anchorEl[seller.id || 1]}
-                                            open={Boolean(anchorEl[seller.id || 1])}
-                                            onClose={() => handleClose(seller.id || 1)}
+                                            anchorEl={anchorEl[seller.id || 0]}
+                                            open={Boolean(anchorEl[seller.id || 0])}
+                                            onClose={() => handleClose(seller.id || 0)}
                                         >
                                             {accountStatuses.map((status) => (
                                                 <MenuItem 
                                                     key={status.status}
-                                                    onClick={() => handleUpdateSellerAccountStatus(seller.id || 1, status.status)}
+                                                    onClick={() => handleUpdateSellerAccountStatus(seller.id || 0, status.status)}
                                                     sx={{ 
                                                         color: status.color,
                                                         fontWeight: seller.accountStatus === status.status ? 'bold' : 'normal'
