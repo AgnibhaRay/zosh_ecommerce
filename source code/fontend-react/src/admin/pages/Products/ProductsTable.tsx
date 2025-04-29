@@ -7,7 +7,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
-import { IconButton } from '@mui/material';
+import { CircularProgress, IconButton } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { useAppDispatch, useAppSelector } from '../../../Redux Toolkit/Store';
 import { fetchAllProductsAdmin, deleteProduct } from '../../../Redux Toolkit/Admin/AdminProductSlice';
@@ -31,16 +31,28 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-const ProductsTable: React.FC = () => {
+const ProductsTable = () => {
   const dispatch = useAppDispatch();
-  const { products, loading } = useAppSelector((state) => state.adminProducts);
+  const { products = [], loading } = useAppSelector((state) => state.adminProducts);
 
   useEffect(() => {
     dispatch(fetchAllProductsAdmin(localStorage.getItem('jwt') || ''));
   }, [dispatch]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-[200px]">
+        <CircularProgress />
+      </div>
+    );
+  }
+
+  if (!products || products.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-[200px]">
+        <p>No products found</p>
+      </div>
+    );
   }
 
   return (
@@ -56,7 +68,7 @@ const ProductsTable: React.FC = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {products?.map((product) => (
+          {products.map((product) => (
             <StyledTableRow key={product.id}>
               <StyledTableCell component="th" scope="row">
                 {product.id}

@@ -7,7 +7,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
-import { IconButton } from '@mui/material';
+import { CircularProgress, IconButton } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { useAppDispatch, useAppSelector } from '../../../Redux Toolkit/Store';
 import { fetchAllCustomers, deleteCustomer } from '../../../Redux Toolkit/Admin/AdminCustomerSlice';
@@ -33,14 +33,26 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 const CustomersTable: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { customers, loading } = useAppSelector((state) => state.adminCustomers);
+  const { customers = [], loading } = useAppSelector((state) => state.adminCustomers);
 
   useEffect(() => {
     dispatch(fetchAllCustomers(localStorage.getItem('jwt') || ''));
   }, [dispatch]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-[200px]">
+        <CircularProgress />
+      </div>
+    );
+  }
+
+  if (!customers || customers.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-[200px]">
+        <p>No customers found</p>
+      </div>
+    );
   }
 
   return (
@@ -55,7 +67,7 @@ const CustomersTable: React.FC = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {customers?.map((customer) => (
+          {customers.map((customer) => (
             <StyledTableRow key={customer.id}>
               <StyledTableCell component="th" scope="row">
                 {customer.fullName}

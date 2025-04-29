@@ -19,18 +19,33 @@ import SellerAccountVerified from './seller/pages/SellerAccountVerified';
 
 // Protected Route Component for Admin
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAppSelector(state => state.user);
-  const isAdmin = user?.role === "ROLE_ADMIN";
-  
-  if (!localStorage.getItem("jwt")) {
-    return <Navigate to="/admin-login" />;
+  const { auth, user } = useAppSelector(state => ({
+    auth: state.auth,
+    user: state.user
+  }));
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // If no JWT token, redirect to login
+    if (!localStorage.getItem("jwt")) {
+      navigate("/admin-login");
+      return;
+    }
+
+    // If user data is loaded and user is not admin, redirect to home
+    if (user.user && user.user.role !== "ROLE_ADMIN") {
+      navigate("/");
+      return;
+    }
+  }, [user.user, navigate]);
+
+  // Show loading while checking authentication
+  if (!user.user) {
+    return <div className="h-screen flex items-center justify-center">Loading...</div>;
   }
 
-  if (!isAdmin) {
-    return <Navigate to="/" />;
-  }
-
-  return <>{children}</>;
+  // Only render children if user is admin
+  return user.user.role === "ROLE_ADMIN" ? <>{children}</> : null;
 };
 
 function App() {
