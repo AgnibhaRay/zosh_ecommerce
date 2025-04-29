@@ -54,11 +54,17 @@ export const deleteCustomer = createAsyncThunk<
   { rejectValue: string }
 >('adminCustomer/deleteCustomer', async ({ id, jwt }, { rejectWithValue }) => {
   try {
+    console.log('Attempting to delete customer with ID:', id);
     await api.delete(`${API_URL}/admin/delete/${id}`, {
-      headers: { Authorization: `Bearer ${jwt}` },
+      headers: { 
+        'Authorization': `Bearer ${jwt}`,
+        'Content-Type': 'application/json'
+      },
     });
+    console.log('Successfully deleted customer with ID:', id);
     return id;
   } catch (error: any) {
+    console.error('Error deleting customer:', error.response?.data);
     return rejectWithValue(error.response?.data || 'Failed to delete customer');
   }
 });
