@@ -19,38 +19,34 @@ import SellerAccountVerified from './seller/pages/SellerAccountVerified';
 
 // Protected Route Component for Admin
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { auth, user } = useAppSelector(state => ({
-    auth: state.auth,
-    user: state.user
-  }));
+  const { adminAuth } = useAppSelector(state => state);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If no JWT token, redirect to login
-    if (!localStorage.getItem("jwt")) {
+    // If no admin token, redirect to admin login
+    if (!localStorage.getItem("adminToken")) {
       navigate("/admin-login");
       return;
     }
 
-    // If user data is loaded and user is not admin, redirect to home
-    if (user.user && user.user.role !== "ROLE_ADMIN") {
-      navigate("/");
+    // If not authenticated, redirect to admin login
+    if (!adminAuth.isAuthenticated) {
+      navigate("/admin-login");
       return;
     }
-  }, [user.user, navigate]);
+  }, [adminAuth.isAuthenticated, navigate]);
 
   // Show loading while checking authentication
-  if (!user.user) {
+  if (!adminAuth.isAuthenticated) {
     return <div className="h-screen flex items-center justify-center">Loading...</div>;
   }
 
-  // Only render children if user is admin
-  return user.user.role === "ROLE_ADMIN" ? <>{children}</> : null;
+  return <>{children}</>;
 };
 
 function App() {
   const dispatch = useAppDispatch()
-  const { auth, sellerAuth, sellers, user } = useAppSelector(store => store)
+  const { auth, sellerAuth, sellers } = useAppSelector(store => store)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -77,13 +73,12 @@ function App() {
               <AdminDashboard />
             </AdminRoute>
           } />
-          <Route path="/admin" element={<Navigate to="/admin/dashboard" />} />
-
-          <Route path='/verify-seller/:otp' element={<SellerAccountVerification />} />
-          <Route path='/seller-account-verified' element={<SellerAccountVerified />} />
+          
+          {/* Customer Routes */}
+          <Route path='/*' element={<CustomerRoutes />} />
           <Route path='/become-seller' element={<BecomeSeller />} />
-          <Route path='/dummy' element={<Mobile />} />
-          <Route path='*' element={<CustomerRoutes />} />
+          <Route path='/account/verify' element={<SellerAccountVerification />} />
+          <Route path='/account/verified' element={<SellerAccountVerified />} />
         </Routes>
       </div>
     </ThemeProvider>
