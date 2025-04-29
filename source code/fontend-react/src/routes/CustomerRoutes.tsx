@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, Navigate } from 'react-router-dom'
 import Home from '../customer/pages/Home/Home'
 import Products from '../customer/pages/Products/Products'
 import ProductDetails from '../customer/pages/Products/ProductDetails/ProductDetails'
@@ -21,37 +21,36 @@ import { getWishlistByUserId } from '../Redux Toolkit/Customer/WishlistSlice'
 import ChatBot from '../customer/pages/ChatBot/ChatBot'
 import SearchProducts from '../customer/pages/Search/SearchProducts'
 
-
 const CustomerRoutes = () => {
   const dispatch = useAppDispatch()
-    const { cart, auth } = useAppSelector(store => store);
+  const { cart, auth } = useAppSelector(store => store);
 
-    useEffect(() => {
-        dispatch(fetchUserCart(localStorage.getItem("jwt") || ""))
-        dispatch(getWishlistByUserId())
-    }, [auth.jwt])
+  useEffect(() => {
+    dispatch(fetchUserCart(localStorage.getItem("jwt") || ""))
+    dispatch(getWishlistByUserId())
+  }, [auth.jwt])
+
   return (
     <>
       <Navbar />
       <Routes>
-        <Route path='/' element={<Home />} />
-        {/* <Route path='/chat-bot' element={<ChatBot />} /> */}
-        <Route path='/products/:categoryId' element={<Products />} />
-        <Route path='/search-products' element={<SearchProducts />} />
-        <Route path='/reviews/:productId' element={<Reviews />} />
-        <Route path='/reviews/:productId/create' element={<WriteReviews />} />
-        <Route path='/product-details/:categoryId/:name/:productId' element={<ProductDetails />} />
-        <Route path='/cart' element={<Cart />} />
-        <Route path='/wishlist' element={<Wishlist />} />
-        <Route path='/checkout/address' element={<Address />} />
-        <Route path='/account/*' element={<Profile />} />
-        <Route path='/login' element={<Auth/>} />
-        <Route path='/payment-success/:orderId' element={<PaymentSuccessHandler/>} />
-        <Route path='*' element={<NotFound />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/search-products" element={<SearchProducts />} />
+        <Route path="/products/:categoryId" element={<Products />} />
+        <Route path="/reviews/:productId" element={<Reviews />} />
+        <Route path="/reviews/:productId/create" element={<WriteReviews />} />
+        <Route path="/product-details/:categoryId/:name/:productId" element={<ProductDetails />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/checkout/address" element={<Address />} />
+        <Route path="/account/*" element={<Profile />} />
+        <Route path="/login" element={<Auth/>} />
+        <Route path="/payment-success/:orderId" element={<PaymentSuccessHandler/>} />
+        {/* Redirect any unmatched paths to Home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
     </>
-
   )
 }
 

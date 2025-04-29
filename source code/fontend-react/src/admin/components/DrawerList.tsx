@@ -4,9 +4,8 @@ import PeopleIcon from '@mui/icons-material/People';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import LogoutIcon from '@mui/icons-material/Logout';
 import LocalMallIcon from '@mui/icons-material/LocalMall';
-import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../Redux Toolkit/Store";
-import { logout } from "../../Redux Toolkit/Admin/AdminAuthSlice";
+import { performLogout } from "../../Redux Toolkit/Customer/AuthSlice";
 
 const menu = [
     {
@@ -43,15 +42,11 @@ interface DrawerListProps {
 }
 
 const AdminDrawerList = ({ toggleDrawer }: DrawerListProps) => {
-    const navigate = useNavigate();
     const dispatch = useAppDispatch();
 
     const handleClick = (item: any) => {
         if (item.name === "Logout") {
-            dispatch(logout());
-            navigate("/");
-        } else {
-            navigate(item.path);
+            dispatch(performLogout());
         }
         if (toggleDrawer) toggleDrawer(false)();
     };

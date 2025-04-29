@@ -12,36 +12,39 @@ import AdminAuth from './admin/pages/Auth/AdminAuth';
 import { fetchUserProfile } from './Redux Toolkit/Customer/UserSlice';
 import { createHomeCategories } from './Redux Toolkit/Customer/Customer/AsyncThunk';
 import { homeCategories } from './data/homeCategories';
-import Mobile from './data/Products/mobile';
 import SellerDashboard from './seller/pages/SellerDashboard/SellerDashboard';
 import SellerAccountVerification from './seller/pages/SellerAccountVerification';
 import SellerAccountVerified from './seller/pages/SellerAccountVerified';
 
 // Protected Route Component for Admin
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { adminAuth } = useAppSelector(state => state);
+  const { auth, user } = useAppSelector(state => ({
+    auth: state.auth,
+    user: state.user
+  }));
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If no admin token, redirect to admin login
-    if (!localStorage.getItem("adminToken")) {
+    // If no JWT token, redirect to login
+    if (!localStorage.getItem("jwt")) {
       navigate("/admin-login");
       return;
     }
 
-    // If not authenticated, redirect to admin login
-    if (!adminAuth.isAuthenticated) {
-      navigate("/admin-login");
+    // If user data is loaded and user is not admin, redirect to home
+    if (user.user && user.user.role !== "ROLE_ADMIN") {
+      navigate("/");
       return;
     }
-  }, [adminAuth.isAuthenticated, navigate]);
+  }, [user.user, navigate]);
 
   // Show loading while checking authentication
-  if (!adminAuth.isAuthenticated) {
+  if (!user.user) {
     return <div className="h-screen flex items-center justify-center">Loading...</div>;
   }
 
-  return <>{children}</>;
+  // Only render children if user is admin
+  return user.user.role === "ROLE_ADMIN" ? <>{children}</> : null;
 };
 
 function App() {
@@ -64,8 +67,6 @@ function App() {
     <ThemeProvider theme={customeTheme}>
       <div className='App'>
         <Routes>
-          {sellers.profile && <Route path='/seller/*' element={<SellerDashboard />} />}
-          
           {/* Admin Routes */}
           <Route path="/admin-login" element={<AdminAuth />} />
           <Route path="/admin/*" element={
@@ -74,11 +75,14 @@ function App() {
             </AdminRoute>
           } />
           
-          {/* Customer Routes */}
-          <Route path='/*' element={<CustomerRoutes />} />
+          {/* Seller Routes */}
+          {sellers.profile && <Route path='/seller/*' element={<SellerDashboard />} />}
           <Route path='/become-seller' element={<BecomeSeller />} />
           <Route path='/account/verify' element={<SellerAccountVerification />} />
           <Route path='/account/verified' element={<SellerAccountVerified />} />
+          
+          {/* Customer Routes - Acts as fallback for all other paths */}
+          <Route path='/*' element={<CustomerRoutes />} />
         </Routes>
       </div>
     </ThemeProvider>

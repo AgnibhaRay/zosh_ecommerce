@@ -4,32 +4,24 @@ import { FormikValues, useFormik } from 'formik';
 import { useAppDispatch, useAppSelector } from '../../../Redux Toolkit/Store';
 import { useNavigate } from 'react-router-dom';
 import OTPInput from '../../../customer/components/OtpFild/OTPInput';
-import { sendAdminLoginOtp, verifyAdminLogin } from '../../../Redux Toolkit/Admin/AdminAuthSlice';
-import * as Yup from 'yup';
+import { sendLoginSignupOtp, signin } from '../../../Redux Toolkit/Customer/AuthSlice';
 
 const AdminLoginForm = () => {
     const navigate = useNavigate();
     const [otp, setOtp] = useState("");
+    const [isOtpSent, setIsOtpSent] = useState(false)
     const [timer, setTimer] = useState<number>(30);
     const [isTimerActive, setIsTimerActive] = useState<boolean>(false);
     const dispatch = useAppDispatch();
-    const { adminAuth } = useAppSelector(store => store);
+    const { auth } = useAppSelector(store => store);
 
     const formik = useFormik({
         initialValues: {
             email: '',
+            otp: ''
         },
-        validationSchema: Yup.object({
-            email: Yup.string()
-                .email('Invalid email address')
-                .required('Required'),
-        }),
-        onSubmit: (values) => {
-            dispatch(verifyAdminLogin({ email: values.email, otp }))
-                .unwrap()
-                .then(() => {
-                    navigate("/admin/dashboard");
-                });
+        onSubmit: (values: any) => {
+            dispatch(signin({ email: values.email, otp, navigate }))
         }
     });
 
@@ -38,17 +30,18 @@ const AdminLoginForm = () => {
     };
 
     const handleResendOTP = () => {
-        dispatch(sendAdminLoginOtp(formik.values.email));
+        dispatch(sendLoginSignupOtp({ email: formik.values.email }))
         setTimer(30);
         setIsTimerActive(true);
     };
 
-    const handleSendOtp = () => {
-        if (formik.isValid && formik.values.email) {
-            dispatch(sendAdminLoginOtp(formik.values.email));
-            setTimer(30);
-            setIsTimerActive(true);
-        }
+    const handleSentOtp = () => {
+        setIsOtpSent(true);
+        handleResendOTP();
+    };
+
+    const handleLogin = () => {
+        formik.handleSubmit();
     };
 
     useEffect(() => {
@@ -73,59 +66,61 @@ const AdminLoginForm = () => {
     return (
         <div className="p-5">
             <h1 className='text-center font-bold text-xl text-primary-color pb-8'>Admin Login</h1>
-            <form className="space-y-5" onSubmit={formik.handleSubmit}>
+            <form className="space-y-5">
                 <TextField
                     fullWidth
                     name="email"
-                    label="Admin Email"
+                    label="Email"
                     value={formik.values.email}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    error={formik.touched.email && Boolean(formik.errors.email)}
-                    helperText={formik.touched.email && formik.errors.email}
                 />
 
-                {adminAuth.otpSent && (
-                    <div className="space-y-2">
-                        <p className="font-medium text-sm">
-                            * Enter OTP sent to your email
-                        </p>
-                        <OTPInput
-                            length={6}
-                            onChange={handleOtpChange}
-                            error={false}
-                        />
-                        <p className="text-xs space-x-2">
-                            {isTimerActive ? (
-                                <span>Resend OTP in {timer} seconds</span>
-                            ) : (
-                                <>
-                                    Didn't receive OTP?{" "}
-                                    <span
-                                        onClick={handleResendOTP}
-                                        className="text-teal-600 cursor-pointer hover:text-teal-800 font-semibold"
-                                    >
-                                        Resend OTP
-                                    </span>
-                                </>
-                            )}
-                        </p>
-                    </div>
-                )}
+                {auth.otpSent && <div className="space-y-2">
+                    <p className="font-medium text-sm">
+                        * Enter OTP sent to your email
+                    </p>
+                    <OTPInput
+                        length={6}
+                        onChange={handleOtpChange}
+                        error={false}
+                    />
+                    <p className="text-xs space-x-2">
+                        {isTimerActive ? (
+                            <span>Resend OTP in {timer} seconds</span>
+                        ) : (
+                            <>
+                                Didn't receive OTP?{" "}
+                                <span
+                                    onClick={handleResendOTP}
+                                    className="text-teal-600 cursor-pointer hover:text-teal-800 font-semibold"
+                                >
+                                    Resend OTP
+                                </span>
+                            </>
+                        )}
+                    </p>
+                </div>}
 
-                <Button
+                {auth.otpSent && <div>
+                    <Button
+                        disabled={auth.loading}
+                        onClick={handleLogin}
+                        fullWidth
+                        variant='contained'
+                        sx={{ py: "11px" }}>
+                        {auth.loading ? <CircularProgress /> : "Login"}
+                    </Button>
+                </div>}
+
+                {!auth.otpSent && <Button
+                    disabled={auth.loading}
                     fullWidth
                     variant='contained'
-                    disabled={adminAuth.loading}
-                    onClick={adminAuth.otpSent ? formik.submitForm : handleSendOtp}
-                    sx={{ py: "11px" }}
-                >
-                    {adminAuth.loading ? (
-                        <CircularProgress size={24} />
-                    ) : (
-                        adminAuth.otpSent ? "Login" : "Send OTP"
-                    )}
-                </Button>
+                    onClick={handleSentOtp}
+                    sx={{ py: "11px" }}>
+                    {auth.loading ? <CircularProgress /> : "Send OTP"}
+                </Button>}
             </form>
         </div>
     );
