@@ -73,6 +73,34 @@ public class UserServiceImplementation implements UserService {
 		throw new UserException("user not exist with username "+username);
 	}
 
+	@Override
+	public List<User> getAllUsers() {
+		return userRepository.findAll();
+	}
 
+	@Override
+	public User createUser(User user) throws UserException {
+		User existingUser = userRepository.findByEmail(user.getEmail());
+		if (existingUser != null) {
+			throw new UserException("Email already registered");
+		}
+		
+		// Encode password
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		
+		return userRepository.save(user);
+	}
+
+	@Override
+	public void deleteUser(Long userId) throws UserException {
+		User user = findUserById(userId);
+		userRepository.delete(user);
+	}
+
+	@Override
+	public User findUserById(Long userId) throws UserException {
+		return userRepository.findById(userId)
+			.orElseThrow(() -> new UserException("User not found with id: " + userId));
+	}
 
 }

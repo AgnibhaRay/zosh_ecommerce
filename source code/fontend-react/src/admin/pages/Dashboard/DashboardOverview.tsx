@@ -1,12 +1,21 @@
 import React from 'react';
 import { useAppSelector } from '../../../Redux Toolkit/Store';
-import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
+import { Box, Card, CardContent, Grid, Typography, CircularProgress } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import LocalMallIcon from '@mui/icons-material/LocalMall';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 
 const DashboardOverview = () => {
   const { adminCustomers, adminProducts, sellers } = useAppSelector((state) => state);
+
+  // Check if any of the required data is still loading
+  if (adminCustomers.loading || adminProducts.loading || sellers.loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   const stats = [
     {

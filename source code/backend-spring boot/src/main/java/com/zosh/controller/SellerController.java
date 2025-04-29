@@ -15,7 +15,6 @@ import com.zosh.service.impl.CustomeUserServiceImplementation;
 import com.zosh.utils.OtpUtils;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -45,7 +44,8 @@ public class SellerController {
 
     @PostMapping("/sent/login-top")
     public ResponseEntity<ApiResponse> sentLoginOtp(@RequestBody VerificationCode req) throws MessagingException, SellerException {
-        Seller seller = sellerService.getSellerByEmail(req.getEmail());
+        // Validate seller exists
+        sellerService.getSellerByEmail(req.getEmail());
 
         String otp = OtpUtils.generateOTP();
         VerificationCode verificationCode = verificationService.createVerificationCode(otp, req.getEmail());
@@ -131,6 +131,32 @@ public class SellerController {
         String text = "Welcome to Zosh Bazaar, verify your account using this link ";
         String frontend_url = "http://localhost:3000/verify-seller/";
         emailService.sendVerificationOtpEmail(seller.getEmail(), verificationCode.getOtp(), subject, text + frontend_url);
+        return new ResponseEntity<>(savedSeller, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<Seller> registerSeller(@RequestBody Seller seller) throws SellerException, MessagingException {
+        Seller existingSeller = sellerService.getSellerByEmail(seller.getEmail());
+        if (existingSeller != null) {
+            throw new SellerException("Seller already exists with this email");
+        }
+
+        // Set initial properties
+        seller.setRole(USER_ROLE.ROLE_SELLER);
+        seller.setAccountStatus(AccountStatus.PENDING_VERIFICATION);
+        seller.setEmailVerified(false);
+
+        Seller savedSeller = sellerService.createSeller(seller);
+
+        // Generate and send verification OTP
+        String otp = OtpUtils.generateOTP();
+        VerificationCode verificationCode = verificationService.createVerificationCode(otp, seller.getEmail());
+
+        String subject = "Zosh Bazaar Email Verification Code";
+        String text = "Welcome to Zosh Bazaar, verify your account using this link ";
+        String frontend_url = "http://localhost:3000/verify-seller/";
+        emailService.sendVerificationOtpEmail(seller.getEmail(), verificationCode.getOtp(), subject, text + frontend_url);
+        
         return new ResponseEntity<>(savedSeller, HttpStatus.CREATED);
     }
 
