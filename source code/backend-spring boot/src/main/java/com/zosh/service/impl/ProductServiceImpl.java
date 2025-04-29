@@ -208,7 +208,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> recentlyAddedProduct() {
-        return List.of();
+        return productRepository.findAll();
     }
 
     @Override

@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Product } from '../../types/productTypes';
 import { api } from '../../Config/Api';
 
-const API_URL = '/products';
+const API_URL = '/products'; // Base URL for products endpoints
 
 interface AdminProductState {
   products: Product[];
@@ -27,9 +27,11 @@ export const fetchAllProductsAdmin = createAsyncThunk<
     const response = await api.get<Product[]>(`${API_URL}/admin/all`, {
       headers: { Authorization: `Bearer ${jwt}` },
     });
+    console.log('Admin products fetched:', response.data);
     return response.data;
   } catch (error: any) {
-    return rejectWithValue(error.response?.data || 'Failed to fetch products');
+    console.error('Error fetching admin products:', error.response?.data);
+    return rejectWithValue(error.response?.data?.message || 'Failed to fetch products');
   }
 });
 

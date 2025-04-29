@@ -25,7 +25,10 @@ public class ProductController {
 
     private final SellerService sellerService;
 
-
+    @GetMapping("/admin/all")
+    public ResponseEntity<List<Product>> getAllProductsForAdmin() {
+        return new ResponseEntity<>(productService.recentlyAddedProduct(), HttpStatus.OK);
+    }
 
     @GetMapping("/{productId}")
     public ResponseEntity<Product> getProductById(@PathVariable Long productId) throws ProductException {
