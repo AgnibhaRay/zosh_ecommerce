@@ -1,6 +1,4 @@
 import * as React from "react";
-
-
 import DrawerList from "../../admin seller/components/drawerList/DrawerList";
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
@@ -13,12 +11,14 @@ import IntegrationInstructionsIcon from '@mui/icons-material/IntegrationInstruct
 import { Category } from "@mui/icons-material";
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import LogoutIcon from '@mui/icons-material/Logout';
+import StorefrontIcon from '@mui/icons-material/Storefront';
+
 const menu = [
     {
-        name: "Dashboard",
-        path: "/admin",
-        icon: <DashboardIcon className="text-primary-color" />,
-        activeIcon: <DashboardIcon className="text-white" />,
+        name: "Sellers",
+        path: "/admin/sellers",
+        icon: <StorefrontIcon className="text-primary-color" />,
+        activeIcon: <StorefrontIcon className="text-white" />,
     },
     {
         name: "Add Seller",
@@ -86,11 +86,9 @@ const menu = [
         icon: <LocalOfferIcon className="text-primary-color" />,
         activeIcon: <LocalOfferIcon className="text-white" />,
     },
-   
 ];
 
 const menu2 = [
-
     {
         name: "Account",
         path: "/seller/account",
@@ -103,20 +101,18 @@ const menu2 = [
         icon: <LogoutIcon className="text-primary-color" />,
         activeIcon: <LogoutIcon className="text-white" />,
     },
+];
 
-]
-
-interface DrawerListProps{
-    toggleDrawer?:any;
+interface DrawerListProps {
+    toggleDrawer?: any;
 }
 
 const AdminDrawerList = ({ toggleDrawer }: DrawerListProps) => {
-
     return (
         <>
-            <DrawerList toggleDrawer={toggleDrawer} menu={menu} menu2={menu2}/>
+            <DrawerList toggleDrawer={toggleDrawer} menu={menu} menu2={menu2} />
         </>
     );
-}; 
+};
 
 export default AdminDrawerList;
