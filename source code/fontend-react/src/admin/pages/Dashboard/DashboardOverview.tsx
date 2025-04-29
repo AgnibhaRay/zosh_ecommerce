@@ -4,6 +4,7 @@ import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import LocalMallIcon from '@mui/icons-material/LocalMall';
 import StorefrontIcon from '@mui/icons-material/Storefront';
+import SellersTable from '../sellers/SellersTable';
 
 const DashboardOverview = () => {
   const { adminCustomers, adminProducts, sellers } = useAppSelector((state) => state);
@@ -34,7 +35,7 @@ const DashboardOverview = () => {
       <Typography variant="h4" gutterBottom>
         Dashboard Overview
       </Typography>
-      <Grid container spacing={3}>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
         {stats.map((stat, index) => (
           <Grid item xs={12} sm={6} md={4} key={index}>
             <Card sx={{ bgcolor: stat.bgColor, color: 'white' }}>
@@ -58,6 +59,11 @@ const DashboardOverview = () => {
           </Grid>
         ))}
       </Grid>
+
+      {/* Sellers Table */}
+      <Box sx={{ mt: 4 }}>
+        <SellersTable />
+      </Box>
     </Box>
   );
 };
