@@ -12,7 +12,6 @@ import com.zosh.repository.PaymentOrderRepository;
 import com.zosh.response.PaymentLinkResponse;
 import com.zosh.service.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,69 +36,99 @@ public class OrderController {
 	
 	@PostMapping()
 	public ResponseEntity<PaymentLinkResponse> createOrderHandler(
-			@RequestBody Address spippingAddress,
-			@RequestParam PaymentMethod paymentMethod,
-			@RequestHeader("Authorization")String jwt)
-            throws UserException, RazorpayException, StripeException {
-		
-		User user=userService.findUserProfileByJwt(jwt);
-		Cart cart=cartService.findUserCart(user);
-		Set<Order> orders =orderService.createOrder(user, spippingAddress,cart);
+	        @RequestBody Address shippingAddress,
+	        @RequestParam PaymentMethod paymentMethod,
+	        @RequestHeader("Authorization") String jwt)
+	        throws UserException, RazorpayException, StripeException {
+	    try {
+	        User user = userService.findUserProfileByJwt(jwt);
+	        Cart cart = cartService.findUserCart(user);
+	        
+	        // Validate cart is not empty
+	        if (cart.getCartItems() == null || cart.getCartItems().isEmpty()) {
+	            throw new UserException("Cart is empty");
+	        }
 
-		PaymentOrder paymentOrder=paymentService.createOrder(user,orders);
+	        // Create orders
+	        Set<Order> orders = orderService.createOrder(user, shippingAddress, cart);
+	        
+	        // Calculate total amount including shipping
+	        double cartTotal = cart.getTotalSellingPrice();
+	        Long totalAmount = Math.round(cartTotal);
+	        if (totalAmount < 1500) {
+	            totalAmount += 79; // Add shipping if applicable
+	        }
 
-		PaymentLinkResponse res = new PaymentLinkResponse();
+	        // Account for any coupon discounts
+	        if (cart.getCouponPrice() > 0) {
+	            totalAmount -= cart.getCouponPrice();
+	        }
 
-		if(paymentMethod.equals(PaymentMethod.RAZORPAY)){
-			PaymentLink payment=paymentService.createRazorpayPaymentLink(user,
-					paymentOrder.getAmount(),
-					paymentOrder.getId());
-			String paymentUrl=payment.get("short_url");
-			String paymentUrlId=payment.get("id");
+	        // Create payment order
+	        PaymentOrder paymentOrder = paymentService.createOrder(user, orders);
+	        paymentOrder.setAmount(totalAmount);
+	        paymentOrder.setPaymentMethod(paymentMethod);
+	        paymentOrderRepository.save(paymentOrder);
 
+	        PaymentLinkResponse res = new PaymentLinkResponse();
 
-			res.setPayment_link_url(paymentUrl);
-//			res.setPayment_link_id(paymentUrlId);
-			paymentOrder.setPaymentLinkId(paymentUrlId);
-			paymentOrderRepository.save(paymentOrder);
-		}
-		else{
-			String paymentUrl=paymentService.createStripePaymentLink(user,
-					paymentOrder.getAmount(),
-					paymentOrder.getId());
-			res.setPayment_link_url(paymentUrl);
-		}
-		return new ResponseEntity<>(res,HttpStatus.OK);
+	        try {
+	            if (paymentMethod == PaymentMethod.RAZORPAY) {
+	                PaymentLink payment = paymentService.createRazorpayPaymentLink(user, totalAmount, paymentOrder.getId());
+	                res.setPayment_link_url(payment.get("short_url"));
+	                paymentOrder.setPaymentLinkId(payment.get("id"));
+	                paymentOrderRepository.save(paymentOrder);
+	            } else if (paymentMethod == PaymentMethod.STRIPE) {
+	                String paymentUrl = paymentService.createStripePaymentLink(user, totalAmount, paymentOrder.getId());
+	                res.setPayment_link_url(paymentUrl);
+	            } else {
+	                throw new UserException("Invalid payment method");
+	            }
+	        } catch (Exception e) {
+	            // Cleanup orders on payment creation failure
+	            orderService.deleteOrder(paymentOrder.getId());
+	            throw e;
+	        }
 
+	        return new ResponseEntity<>(res, HttpStatus.OK);
+	    } catch (UserException | RazorpayException | StripeException e) {
+	        throw e;
+	    } catch (Exception e) {
+	        throw new UserException("Failed to create order: " + e.getMessage());
+	    }
 	}
 	
 	@GetMapping("/user")
-	public ResponseEntity< List<Order>> usersOrderHistoryHandler(
-			@RequestHeader("Authorization")
-	String jwt) throws UserException{
-		
-		User user=userService.findUserProfileByJwt(jwt);
-		List<Order> orders=orderService.usersOrderHistory(user.getId());
-		return new ResponseEntity<>(orders,HttpStatus.ACCEPTED);
+	public ResponseEntity<List<Order>> usersOrderHistoryHandler(
+	        @RequestHeader("Authorization") String jwt) throws UserException {
+	    User user = userService.findUserProfileByJwt(jwt);
+	    List<Order> orders = orderService.usersOrderHistory(user.getId());
+	    return new ResponseEntity<>(orders, HttpStatus.ACCEPTED);
 	}
 	
 	@GetMapping("/{orderId}")
-	public ResponseEntity< Order> getOrderById(@PathVariable Long orderId, @RequestHeader("Authorization")
-	String jwt) throws OrderException, UserException{
-		
-		User user = userService.findUserProfileByJwt(jwt);
-		Order orders=orderService.findOrderById(orderId);
-		return new ResponseEntity<>(orders,HttpStatus.ACCEPTED);
+	public ResponseEntity<Order> getOrderById(
+	        @PathVariable Long orderId,
+	        @RequestHeader("Authorization") String jwt) throws OrderException, UserException {
+	    // Validate user has access to this order
+	    userService.findUserProfileByJwt(jwt);
+	    Order order = orderService.findOrderById(orderId);
+	    return new ResponseEntity<>(order, HttpStatus.ACCEPTED);
 	}
 
 	@GetMapping("/item/{orderItemId}")
 	public ResponseEntity<OrderItem> getOrderItemById(
 			@PathVariable Long orderItemId, @RequestHeader("Authorization")
 	String jwt) throws Exception {
-		System.out.println("------- controller ");
 		User user = userService.findUserProfileByJwt(jwt);
-		OrderItem orderItem=orderItemService.getOrderItemById(orderItemId);
-		return new ResponseEntity<>(orderItem,HttpStatus.ACCEPTED);
+		OrderItem orderItem = orderItemService.getOrderItemById(orderItemId);
+		
+		// Validate that the order item belongs to the user
+		if (!orderItem.getOrder().getUser().getId().equals(user.getId())) {
+			throw new OrderException("Order item does not belong to the user");
+		}
+		
+		return new ResponseEntity<>(orderItem, HttpStatus.ACCEPTED);
 	}
 
 	@PutMapping("/{orderId}/cancel")
